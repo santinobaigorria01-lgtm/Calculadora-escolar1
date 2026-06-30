@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Notas (Beta)</title>
+    <style>
+        /* Estilos Generales */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Contenedor Principal */
+        .calculadora-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        /* Título Principal */
+        h1 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        /* Bloque de Entradas/Etapas */
+        .etapas-container {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .etapa-row {
+            margin-bottom: 15px;
+        }
+
+        .etapa-row label {
+            display: block;
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        /* Inputs con validación de 0 a 100 */
+        .etapa-row input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .etapa-row input:focus {
+            border-color: #3498db;
+        }
+
+        /* Sección de Botones de Preguntas */
+        .botones-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-pregunta {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            font-size: 0.95rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-pregunta:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-pregunta:active {
+            transform: scale(0.98);
+        }
+
+        /* Cuadro de Resultado */
+        .resultado-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #ebf5fb;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1rem;
+            display: none;
+            border-left: 5px solid #3498db;
+            text-align: left;
+        }
+
+        /* Etiqueta Beta */
+        .beta-badge {
+            display: inline-block;
+            background-color: #e67e22;
+            color: white;
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculadora-box">
+        <!-- Título Superior -->
+        <h1>Introduce tus notas de</h1>
+
+        <!-- Formulario con las Cuatro Etapas -->
+        <form class="etapas-container" onsubmit="event.preventDefault();">
+            <div class="etapa-row">
+                <label for="nota1">Primera etapa</label>
+                <input type="number" id="nota1" min="0" max="100" placeholder="0 a 100">
+            </div>
+
+            <div class="etapa-row">
+                <label for="nota2">Segunda etapa</label>
+                <input type="number" id="nota2" min="0" max="100" placeholder="0 a 100">
+            </div>
+
+            <div class="etapa-row">
+                <label for="nota3">Tercera etapa</label>
+                <input type="number" id="nota3" min="0" max="100" placeholder="0 a 100">
+            </div>
+
+            <div class="etapa-row">
+                <label for="nota4">Cuarta etapa</label>
+                <input type="number" id="nota4" min="0" max="100" placeholder="0 a 100">
+            </div>
+        </form>
+
+        <!-- Botones de Acción (Preguntas) -->
+        <div class="botones-container">
+            <button class="btn-pregunta" onclick="calcularPromedio()">¿Cuál es mi promedio?</button>
+            <button class="btn-pregunta" onclick="calcularExoneracion()">¿Cuánto tengo que sacar para exonerar?</button>
+        </div>
+
+        <!-- Cuadro donde aparecerá la respuesta en pantalla -->
+        <div id="resultado" class="resultado-box"></div>
+
+        <!-- Indicador de Versión -->
+        
+    </div>
+
+    <script>
+    function obtenerYValidarNotas() {
+        const notas = [
+            parseFloat(document.getElementById('nota1').value),
+            parseFloat(document.getElementById('nota2').value),
+            parseFloat(document.getElementById('nota3').value),
+            parseFloat(document.getElementById('nota4').value)
+        ];
+        
+        const validas = [];
+        const res = document.getElementById('resultado');
+
+        for (let n of notas) {
+            if (!isNaN(n)) {
+                if (n < 0 || n > 100) {
+                    res.style.display = "block";
+                    res.innerHTML = "Error: Introdujiste una nota fuera de rango (debe ser de 0 a 100).";
+                    res.style.borderColor = "#e74c3c";
+                    return null;
+                }
+                validas.push(n);
+            }
+        }
+        return validas;
+    }
+
+    function calcularPromedio() {
+        const notas = obtenerYValidarNotas();
+        if (notas === null) return;
+        const res = document.getElementById('resultado');
+        res.style.display = "block";
+        res.style.borderColor = "#3498db";
+
+        if (notas.length === 0) {
+            res.innerHTML = "Por favor, introduce al menos una nota.";
+            res.style.borderColor = "#e74c3c";
+            return;
+        }
+
+        const suma = notas.reduce((a, b) => a + b, 0);
+        let prom = (suma * 100) / (notas.length * 100);
+        res.innerHTML = "Tu promedio es de " + (Math.round(prom * 100) / 100) + "%";
+    }
+
+    function calcularExoneracion() {
+        const notas = obtenerYValidarNotas();
+        if (notas === null) return;
+        const res = document.getElementById('resultado');
+        res.style.display = "block";
+
+        if (notas.length === 0) {
+            res.innerHTML = "Por favor, introduce al menos una nota.";
+            res.style.borderColor = "#e74c3c";
+            return;
+        }
+
+        const suma = notas.reduce((a, b) => a + b, 0);
+        if (notas.length === 4) {
+            if (suma >= 320) {
+                res.innerHTML = "¡Ya acumulaste " + suma + " puntos! Estás exonerado.";
+                res.style.borderColor = "#2ecc71";
+            } else {
+                res.innerHTML = "Acumulaste " + suma + " puntos. No lograste exonerar.";
+                res.style.borderColor = "#e74c3c";
+            }
+            return;
+        }
+
+        let faltante = Math.ceil((320 - suma) / (4 - notas.length));
+
+        if (faltante > 100) {
+            res.innerHTML = "Matemáticamente ya no es posible exonerar (necesitas " + faltante + "%).";
+            res.style.borderColor = "#e74c3c";
+        } else if (faltante <= 0) {
+            res.innerHTML = "¡Ya estás asegurado! Puedes sacar 0% en lo que queda.";
+            res.style.borderColor = "#2ecc71";
+        } else {
+            res.innerHTML = "Tienes que sacar como MINIMO " + faltante + "% en las siguientes etapas para exonerar.";
+            res.style.borderColor = "#3498db";
+        }
+    }
+</script>
+
+</body>
+</html>
